@@ -275,7 +275,6 @@ async function fetchEthPrice() {
 
     priceValue.textContent = formatPrice(result.price);
     lastUpdated.textContent = formatClock(now);
-    sourceName.textContent = result.source;
     state.history.unshift({
       price: result.price,
       timestamp: now,
