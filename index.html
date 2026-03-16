@@ -54,11 +54,45 @@
         </article>
 
         <article class="history-card">
-          <div class="panel-head">
-            <h2>Recent Checks</h2>
-            <span class="history-note">Latest 8 samples</span>
+          <div class="panel-block">
+            <div class="panel-head">
+              <h2>Data Source</h2>
+              <span class="history-note">Top 10 spot venues</span>
+            </div>
+            <div class="source-form">
+              <label class="field">
+                <span class="field-label">Exchange</span>
+                <select id="sourceSelect"></select>
+              </label>
+              <label class="field">
+                <span class="field-label">Source label</span>
+                <input id="sourceLabelInput" type="text" />
+              </label>
+              <label class="field field-full">
+                <span class="field-label">API endpoint</span>
+                <input id="sourceUrlInput" type="url" />
+              </label>
+              <label class="field field-full">
+                <span class="field-label">Price path</span>
+                <input id="sourcePathInput" type="text" />
+              </label>
+              <div class="action-row source-actions">
+                <button id="applySourceButton" type="button">Apply source</button>
+                <p id="sourceHint" class="source-hint">
+                  Ranking snapshot: March 16, 2026. Some exchanges may require a proxy
+                  if they block browser CORS.
+                </p>
+              </div>
+            </div>
           </div>
-          <ol id="historyList" class="history-list"></ol>
+
+          <div class="panel-block">
+            <div class="panel-head">
+              <h2>Recent Checks</h2>
+              <span class="history-note">Latest 8 samples</span>
+            </div>
+            <ol id="historyList" class="history-list"></ol>
+          </div>
         </article>
       </section>
     </main>

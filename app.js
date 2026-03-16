@@ -1,15 +1,66 @@
 const REFRESH_INTERVAL_MS = 20 * 60 * 1000;
 const HISTORY_LIMIT = 8;
-const API_ENDPOINTS = [
+const STORAGE_KEY = "eth-pulse-source";
+const BUILT_IN_SOURCES = [
   {
-    name: "Coinbase API",
+    key: "coinbase",
+    name: "Coinbase",
     url: "https://api.coinbase.com/v2/prices/ETH-USD/spot",
-    parse: (data) => Number.parseFloat(data?.data?.amount),
+    path: "data.amount",
   },
   {
-    name: "Kraken API",
+    key: "binance",
+    name: "Binance",
+    url: "https://api.binance.com/api/v3/ticker/price?symbol=ETHUSDT",
+    path: "price",
+  },
+  {
+    key: "bybit",
+    name: "Bybit",
+    url: "https://api.bybit.com/v5/market/tickers?category=spot&symbol=ETHUSDT",
+    path: "result.list[0].lastPrice",
+  },
+  {
+    key: "gate",
+    name: "Gate.io",
+    url: "https://api.gateio.ws/api/v4/spot/tickers?currency_pair=ETH_USDT",
+    path: "[0].last",
+  },
+  {
+    key: "kraken",
+    name: "Kraken",
     url: "https://api.kraken.com/0/public/Ticker?pair=ETHUSD",
-    parse: (data) => Number.parseFloat(data?.result?.XETHZUSD?.c?.[0]),
+    path: "result.XETHZUSD.c[0]",
+  },
+  {
+    key: "bitget",
+    name: "Bitget",
+    url: "https://api.bitget.com/api/v2/spot/market/tickers?symbol=ETHUSDT",
+    path: "data[0].lastPr",
+  },
+  {
+    key: "mexc",
+    name: "MEXC",
+    url: "https://api.mexc.com/api/v3/ticker/price?symbol=ETHUSDT",
+    path: "price",
+  },
+  {
+    key: "lbank",
+    name: "LBank",
+    url: "https://api.lbkex.com/v2/ticker/24hr.do?symbol=eth_usdt",
+    path: "data[0].ticker.latest",
+  },
+  {
+    key: "htx",
+    name: "HTX",
+    url: "https://api.huobi.pro/market/detail/merged?symbol=ethusdt",
+    path: "tick.close",
+  },
+  {
+    key: "upbit",
+    name: "Upbit",
+    url: "https://api.upbit.com/v1/ticker?markets=USDT-ETH",
+    path: "[0].trade_price",
   },
 ];
 
@@ -21,12 +72,19 @@ const message = document.querySelector("#message");
 const refreshButton = document.querySelector("#refreshButton");
 const statusBadge = document.querySelector("#statusBadge");
 const sourceName = document.querySelector("#sourceName");
+const sourceSelect = document.querySelector("#sourceSelect");
+const sourceLabelInput = document.querySelector("#sourceLabelInput");
+const sourceUrlInput = document.querySelector("#sourceUrlInput");
+const sourcePathInput = document.querySelector("#sourcePathInput");
+const applySourceButton = document.querySelector("#applySourceButton");
+const sourceHint = document.querySelector("#sourceHint");
 
 const state = {
   history: [],
   nextRefreshAt: Date.now() + REFRESH_INTERVAL_MS,
   countdownTimerId: null,
   refreshTimerId: null,
+  activeSource: null,
 };
 
 function setStatus(kind, text) {
@@ -54,6 +112,90 @@ function formatRemaining(ms) {
   const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, "0");
   const seconds = String(totalSeconds % 60).padStart(2, "0");
   return `${minutes}:${seconds}`;
+}
+
+function tokenizePath(path) {
+  return path
+    .replace(/\[(\d+)\]/g, ".$1")
+    .split(".")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function readPathValue(payload, path) {
+  return tokenizePath(path).reduce((value, token) => {
+    if (value == null) {
+      return undefined;
+    }
+
+    return value[token];
+  }, payload);
+}
+
+function getSourceByKey(key) {
+  return BUILT_IN_SOURCES.find((source) => source.key === key) ?? BUILT_IN_SOURCES[0];
+}
+
+function saveActiveSource() {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify({
+      key: state.activeSource.key,
+      name: state.activeSource.name,
+      url: state.activeSource.url,
+      path: state.activeSource.path,
+    }),
+  );
+}
+
+function syncFormFromSource(source) {
+  sourceSelect.value = source.key;
+  sourceLabelInput.value = source.name;
+  sourceUrlInput.value = source.url;
+  sourcePathInput.value = source.path;
+  sourceHint.textContent =
+    "Ranking snapshot: March 16, 2026. Some exchanges may require a proxy if they block browser CORS.";
+}
+
+function setActiveSource(source) {
+  state.activeSource = {
+    key: source.key,
+    name: source.name,
+    url: source.url,
+    path: source.path,
+  };
+  sourceName.textContent = source.name;
+  syncFormFromSource(state.activeSource);
+  saveActiveSource();
+}
+
+function loadSavedSource() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+
+  if (!raw) {
+    return getSourceByKey("coinbase");
+  }
+
+  try {
+    const saved = JSON.parse(raw);
+    return {
+      key: saved.key || "custom",
+      name: saved.name || "Custom source",
+      url: saved.url || getSourceByKey("coinbase").url,
+      path: saved.path || getSourceByKey("coinbase").path,
+    };
+  } catch {
+    return getSourceByKey("coinbase");
+  }
+}
+
+function populateSourceOptions() {
+  BUILT_IN_SOURCES.forEach((source) => {
+    const option = document.createElement("option");
+    option.value = source.key;
+    option.textContent = source.name;
+    sourceSelect.appendChild(option);
+  });
 }
 
 function renderHistory() {
@@ -110,37 +252,28 @@ function scheduleNextRefresh() {
 }
 
 async function requestPrice() {
-  let lastError = null;
+  const response = await fetch(state.activeSource.url, {
+    headers: {
+      Accept: "application/json",
+    },
+  });
 
-  for (const endpoint of API_ENDPOINTS) {
-    try {
-      const response = await fetch(endpoint.url, {
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const data = await response.json();
-      const price = endpoint.parse(data);
-
-      if (!Number.isFinite(price)) {
-        throw new Error("Invalid price payload");
-      }
-
-      return {
-        price,
-        source: endpoint.name,
-      };
-    } catch (error) {
-      lastError = error;
-    }
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
   }
 
-  throw lastError ?? new Error("Unable to fetch ETH price");
+  const data = await response.json();
+  const rawPrice = readPathValue(data, state.activeSource.path);
+  const price = Number.parseFloat(rawPrice);
+
+  if (!Number.isFinite(price)) {
+    throw new Error(`Invalid price payload at path "${state.activeSource.path}"`);
+  }
+
+  return {
+    price,
+    source: state.activeSource.name,
+  };
 }
 
 async function fetchEthPrice() {
@@ -174,10 +307,39 @@ async function fetchEthPrice() {
   }
 }
 
+function applySourceFromForm() {
+  const selected = getSourceByKey(sourceSelect.value);
+  const nextSource = {
+    key: selected.key,
+    name: sourceLabelInput.value.trim() || selected.name,
+    url: sourceUrlInput.value.trim() || selected.url,
+    path: sourcePathInput.value.trim() || selected.path,
+  };
+
+  setActiveSource(nextSource);
+  state.history = [];
+  renderHistory();
+  message.textContent = `Source updated to ${nextSource.name}. Refreshing now.`;
+  fetchEthPrice();
+}
+
 refreshButton.addEventListener("click", () => {
   fetchEthPrice();
 });
 
+sourceSelect.addEventListener("change", () => {
+  const selected = getSourceByKey(sourceSelect.value);
+  sourceLabelInput.value = selected.name;
+  sourceUrlInput.value = selected.url;
+  sourcePathInput.value = selected.path;
+});
+
+applySourceButton.addEventListener("click", () => {
+  applySourceFromForm();
+});
+
+populateSourceOptions();
+setActiveSource(loadSavedSource());
 renderHistory();
 startCountdown();
 fetchEthPrice();
