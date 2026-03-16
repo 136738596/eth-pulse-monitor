@@ -71,13 +71,7 @@ const historyList = document.querySelector("#historyList");
 const message = document.querySelector("#message");
 const refreshButton = document.querySelector("#refreshButton");
 const statusBadge = document.querySelector("#statusBadge");
-const sourceName = document.querySelector("#sourceName");
 const sourceSelect = document.querySelector("#sourceSelect");
-const sourceLabelInput = document.querySelector("#sourceLabelInput");
-const sourceUrlInput = document.querySelector("#sourceUrlInput");
-const sourcePathInput = document.querySelector("#sourcePathInput");
-const applySourceButton = document.querySelector("#applySourceButton");
-const sourceHint = document.querySelector("#sourceHint");
 
 const state = {
   history: [],
@@ -150,11 +144,6 @@ function saveActiveSource() {
 
 function syncFormFromSource(source) {
   sourceSelect.value = source.key;
-  sourceLabelInput.value = source.name;
-  sourceUrlInput.value = source.url;
-  sourcePathInput.value = source.path;
-  sourceHint.textContent =
-    "Ranking snapshot: March 16, 2026. Some exchanges may require a proxy if they block browser CORS.";
 }
 
 function setActiveSource(source) {
@@ -164,7 +153,6 @@ function setActiveSource(source) {
     url: source.url,
     path: source.path,
   };
-  sourceName.textContent = source.name;
   syncFormFromSource(state.activeSource);
   saveActiveSource();
 }
@@ -307,35 +295,17 @@ async function fetchEthPrice() {
   }
 }
 
-function applySourceFromForm() {
-  const selected = getSourceByKey(sourceSelect.value);
-  const nextSource = {
-    key: selected.key,
-    name: sourceLabelInput.value.trim() || selected.name,
-    url: sourceUrlInput.value.trim() || selected.url,
-    path: sourcePathInput.value.trim() || selected.path,
-  };
-
-  setActiveSource(nextSource);
-  state.history = [];
-  renderHistory();
-  message.textContent = `Source updated to ${nextSource.name}. Refreshing now.`;
-  fetchEthPrice();
-}
-
 refreshButton.addEventListener("click", () => {
   fetchEthPrice();
 });
 
 sourceSelect.addEventListener("change", () => {
   const selected = getSourceByKey(sourceSelect.value);
-  sourceLabelInput.value = selected.name;
-  sourceUrlInput.value = selected.url;
-  sourcePathInput.value = selected.path;
-});
-
-applySourceButton.addEventListener("click", () => {
-  applySourceFromForm();
+  setActiveSource(selected);
+  state.history = [];
+  renderHistory();
+  message.textContent = `Source updated to ${selected.name}. Refreshing now.`;
+  fetchEthPrice();
 });
 
 populateSourceOptions();

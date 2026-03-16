@@ -117,12 +117,6 @@ h1 {
   animation-delay: 120ms;
 }
 
-.panel-block + .panel-block {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(32, 27, 21, 0.1);
-}
-
 .label-row,
 .panel-head,
 .action-row {
@@ -206,6 +200,21 @@ h1 {
   font-size: 1rem;
 }
 
+.inline-select select {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 0.8rem 0.9rem;
+  font: inherit;
+  color: #f8f2e7;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.inline-select select:focus {
+  outline: 2px solid rgba(241, 190, 107, 0.25);
+  border-color: rgba(241, 190, 107, 0.45);
+}
+
 .action-row {
   margin-top: 1.4rem;
   align-items: flex-start;
@@ -250,59 +259,6 @@ button:disabled {
 .history-note {
   color: var(--muted);
   font-size: 0.85rem;
-}
-
-.source-form {
-  margin-top: 1rem;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.9rem;
-}
-
-.field {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.field-full {
-  grid-column: 1 / -1;
-}
-
-.field-label {
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.field input,
-.field select {
-  width: 100%;
-  border: 1px solid rgba(32, 27, 21, 0.12);
-  border-radius: 14px;
-  padding: 0.85rem 0.95rem;
-  font: inherit;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.72);
-}
-
-.field input:focus,
-.field select:focus {
-  outline: 2px solid rgba(207, 143, 46, 0.2);
-  border-color: rgba(207, 143, 46, 0.5);
-}
-
-.source-actions {
-  grid-column: 1 / -1;
-  margin-top: 0.2rem;
-}
-
-.source-hint {
-  margin: 0;
-  max-width: 20rem;
-  text-align: right;
-  line-height: 1.5;
-  color: var(--muted);
 }
 
 .history-list {
@@ -360,10 +316,6 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
-  .source-form {
-    grid-template-columns: 1fr;
-  }
-
   .action-row,
   .label-row,
   .panel-head {
@@ -372,10 +324,6 @@ button:disabled {
   }
 
   .message {
-    text-align: left;
-  }
-
-  .source-hint {
     text-align: left;
   }
 }
