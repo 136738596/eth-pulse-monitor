@@ -45,10 +45,10 @@ const BUILT_IN_SOURCES = [
     path: "price",
   },
   {
-    key: "lbank",
-    name: "LBank",
-    url: "https://api.lbkex.com/v2/ticker/24hr.do?symbol=eth_usdt",
-    path: "data[0].ticker.latest",
+    key: "okx",
+    name: "OKX",
+    url: "https://www.okx.com/api/v5/market/ticker?instId=ETH-USDT",
+    path: "data[0].last",
   },
   {
     key: "htx",
