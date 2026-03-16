@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ETH Pulse Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=DM+Serif+Display:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <p class="eyebrow">Ethereum Price Watch</p>
+        <h1>ETH Pulse</h1>
+        <p class="lede">
+          A focused dashboard that checks the ETH price every 20 minutes and keeps a
+          timestamped trail of recent updates.
+        </p>
+      </section>
+
+      <section class="board">
+        <article class="price-card">
+          <div class="label-row">
+            <span class="label">Current ETH / USD</span>
+            <span id="statusBadge" class="badge badge-idle">Idle</span>
+          </div>
+          <div class="price-row">
+            <span class="currency">$</span>
+            <span id="priceValue" class="price-value">--</span>
+          </div>
+          <div class="meta-grid">
+            <div class="meta-item">
+              <span class="meta-title">Next refresh</span>
+              <strong id="countdown">20:00</strong>
+            </div>
+            <div class="meta-item">
+              <span class="meta-title">Last checked</span>
+              <strong id="lastUpdated">Waiting</strong>
+            </div>
+            <div class="meta-item">
+              <span class="meta-title">Source</span>
+              <strong id="sourceName">Coinbase API</strong>
+            </div>
+          </div>
+          <div class="action-row">
+            <button id="refreshButton" type="button">Refresh now</button>
+            <p id="message" class="message">Ready to monitor.</p>
+          </div>
+        </article>
+
+        <article class="history-card">
+          <div class="panel-head">
+            <h2>Recent Checks</h2>
+            <span class="history-note">Latest 8 samples</span>
+          </div>
+          <ol id="historyList" class="history-list"></ol>
+        </article>
+      </section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
