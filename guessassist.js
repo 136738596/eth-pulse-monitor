@@ -26,7 +26,7 @@ const THEMES = [
 ];
 const LENGTHS = [5, 6, 7, 8];
 const FEEDBACK_STATES = ["miss", "present", "correct"];
-const COMMON_PRIORITY_CUTOFF = { 5: 3000, 6: 4000, 7: 5000, 8: 5000 };
+const COMMON_PRIORITY_CUTOFF = { 5: 900, 6: 1100, 7: 700, 8: 900 };
 
 const themeSelect = document.querySelector("#themeSelect");
 const lengthSelect = document.querySelector("#lengthSelect");
@@ -180,6 +180,8 @@ function getCandidates() {
 
   return {
     all: candidates,
+    common: commonMatches,
+    fallback: fallbackMatches,
     recommended: commonMatches.length > 0 ? commonMatches : fallbackMatches,
     fallbackUsed: commonMatches.length === 0,
   };
@@ -196,8 +198,8 @@ function renderHistory() {
 }
 
 function renderCandidates() {
-  const { all, recommended, fallbackUsed } = getCandidates();
-  candidateCount.textContent = `${all.length} matches`;
+  const { all, common, fallback, recommended, fallbackUsed } = getCandidates();
+  candidateCount.textContent = fallbackUsed ? `${all.length} matches` : `${common.length} strong matches`;
   candidateList.innerHTML = "";
 
   if (all.length === 0) {
@@ -206,9 +208,9 @@ function renderCandidates() {
   }
 
   if (fallbackUsed) {
-    topPick.innerHTML = `<strong>${recommended[0].toUpperCase()}</strong><small>No strong common-word match was found, so these are fallback words that still satisfy all clues.</small>`;
+    topPick.innerHTML = `<strong>${recommended[0].toUpperCase()}</strong><small>No strong daily-word match was found, so these are fallback words that still satisfy all clues.</small>`;
   } else {
-    topPick.innerHTML = `<strong>${recommended[0].toUpperCase()}</strong><small>Best next guess among the more common words that satisfy all clues.</small>`;
+    topPick.innerHTML = `<strong>${recommended[0].toUpperCase()}</strong><small>Best next guess among daily high-frequency words that satisfy all clues.</small>`;
   }
 
   recommended.slice(0, MAX_SUGGESTIONS).forEach((candidate) => {
@@ -242,7 +244,7 @@ function addClue(event) {
   buildFeedbackRow();
   renderHistory();
   renderCandidates();
-  setMessage(`Clue added for ${guess.toUpperCase()}. Recommendations now prefer common words and only fall back to rarer dictionary words if needed.`);
+  setMessage(`Clue added for ${guess.toUpperCase()}. Recommendations now keep only daily high-frequency words in the main list and hide rare words unless no strong match exists.`);
 }
 
 function undoLast() {
