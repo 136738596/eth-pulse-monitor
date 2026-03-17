@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signal Solver</title>
+    <meta
+      name="description"
+      content="A themed word assistant that narrows the next guess from AI, internet, and Web3 word lists based on your color feedback."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Archivo+Black&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./guessassist.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero-card">
+        <div>
+          <p class="eyebrow">Next Guess Assistant</p>
+          <h1>Signal Solver</h1>
+          <p class="lede">
+            Enter your last guess, tap each tile to mark gray, yellow, or green, and get
+            the strongest next guesses from the selected topic set.
+          </p>
+        </div>
+        <div class="hero-controls">
+          <label class="control-item">
+            <span>Theme</span>
+            <select id="themeSelect"></select>
+          </label>
+          <label class="control-item">
+            <span>Letters</span>
+            <select id="lengthSelect"></select>
+          </label>
+          <button id="resetButton" type="button">Reset round</button>
+        </div>
+      </section>
+
+      <section class="workspace-grid">
+        <article class="input-card">
+          <div class="panel-head">
+            <h2>Feedback Input</h2>
+            <span id="attemptCount" class="chip">0 clues</span>
+          </div>
+          <form id="clueForm" class="clue-form">
+            <label class="guess-label" for="guessInput">Last guess</label>
+            <input
+              id="guessInput"
+              type="text"
+              inputmode="text"
+              autocomplete="off"
+              autocapitalize="characters"
+              spellcheck="false"
+              maxlength="8"
+              placeholder="Type your guess"
+            />
+            <div id="feedbackRow" class="feedback-row"></div>
+            <div class="legend-row">
+              <span><i class="tile-sample tile-miss">A</i> not in word</span>
+              <span><i class="tile-sample tile-present">A</i> in word, wrong spot</span>
+              <span><i class="tile-sample tile-correct">A</i> exact match</span>
+            </div>
+            <div class="action-row">
+              <button id="addClueButton" type="submit">Add clue</button>
+              <button id="undoButton" type="button" class="button-secondary">Undo last</button>
+            </div>
+          </form>
+          <p id="message" class="message">Start with one guess and its color pattern.</p>
+          <ol id="historyList" class="history-list"></ol>
+        </article>
+
+        <article class="result-card">
+          <div class="panel-head">
+            <h2>Next Guesses</h2>
+            <span id="candidateCount" class="chip">0 matches</span>
+          </div>
+          <div id="topPick" class="top-pick"></div>
+          <ol id="candidateList" class="candidate-list"></ol>
+        </article>
+      </section>
+    </main>
+
+    <script src="./guessassist.js"></script>
+  </body>
+</html>
