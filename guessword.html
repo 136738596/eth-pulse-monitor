@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signal Guess</title>
+    <meta
+      name="description"
+      content="Guess AI, internet, and Web3 themed words in five tries. Choose 5, 6, 7, or 8 letters and play a focused Wordle-style challenge."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;700;800&family=Archivo+Black&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./guessword.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero-card">
+        <div class="hero-copy">
+          <p class="eyebrow">AI x Internet x Web3</p>
+          <h1>Signal Guess</h1>
+          <p class="lede">
+            Pick a topic, set the word length to 5, 6, 7, or 8 letters, and solve the
+            hidden word in 5 tries.
+          </p>
+        </div>
+        <div class="control-panel">
+          <label class="control-item">
+            <span>Theme</span>
+            <select id="themeSelect"></select>
+          </label>
+          <label class="control-item">
+            <span>Letters</span>
+            <select id="lengthSelect"></select>
+          </label>
+          <button id="newGameButton" type="button">New round</button>
+        </div>
+      </section>
+
+      <section class="game-grid">
+        <article class="board-card">
+          <div class="status-row">
+            <div>
+              <p class="mini-label">Round status</p>
+              <strong id="statusText">Loading...</strong>
+            </div>
+            <div>
+              <p class="mini-label">Tries left</p>
+              <strong id="triesLeft">5</strong>
+            </div>
+          </div>
+          <div id="board" class="board" aria-live="polite"></div>
+          <form id="guessForm" class="guess-form">
+            <label class="guess-label" for="guessInput">Enter your guess</label>
+            <div class="guess-row">
+              <input
+                id="guessInput"
+                name="guess"
+                type="text"
+                inputmode="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                maxlength="8"
+                placeholder="Type a word"
+              />
+              <button id="submitGuessButton" type="submit">Submit</button>
+            </div>
+          </form>
+          <p id="message" class="message">Choose a theme and start guessing.</p>
+        </article>
+
+        <article class="help-card">
+          <div class="panel-head">
+            <h2>How it works</h2>
+          </div>
+          <ul class="rule-list">
+            <li><span class="tile-sample tile-correct">A</span> means the letter is correct and in the right spot.</li>
+            <li><span class="tile-sample tile-present">A</span> means the letter exists, but the position is wrong.</li>
+            <li><span class="tile-sample tile-miss">A</span> means the letter is not in the answer.</li>
+            <li>The guess must match the selected topic and letter count.</li>
+            <li>You get exactly 5 attempts per round.</li>
+          </ul>
+          <div class="theme-notes">
+            <h3>Topic sets</h3>
+            <p><strong>AI</strong>: prompts, models, vectors, training terms.</p>
+            <p><strong>Internet</strong>: browsers, protocols, servers, routing words.</p>
+            <p><strong>Web3</strong>: wallets, rollups, staking, solidity, ledgers.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="./guessword.js"></script>
+  </body>
+</html>
