@@ -65,8 +65,14 @@ function populateControls() {
   lengthSelect.value = String(state.length);
 }
 
-function getWords() {
+function getThemeWords() {
   return WORD_BANK[state.theme][state.length] ?? [];
+}
+
+function getWords() {
+  const themed = getThemeWords();
+  const common = (window.COMMON_WORDS && window.COMMON_WORDS[state.length]) || [];
+  return [...new Set([...themed, ...common])];
 }
 
 function setMessage(text) {
@@ -113,7 +119,8 @@ function normalizeGuess(value) {
 function scoreCandidate(candidate, clues) {
   const unique = new Set(candidate).size;
   const frequencyBonus = clues.length === 0 ? unique : 0;
-  return frequencyBonus + unique / 10;
+  const themeBonus = getThemeWords().includes(candidate) ? 1.5 : 0;
+  return frequencyBonus + unique / 10 + themeBonus;
 }
 
 function evaluateGuess(guess, solution) {
@@ -170,7 +177,7 @@ function renderCandidates() {
   candidateList.innerHTML = "";
 
   if (candidates.length === 0) {
-    topPick.innerHTML = "<strong>No match</strong><small>Your clues conflict with the current word list. Reset or undo the last clue.</small>";
+    topPick.innerHTML = "<strong>No match</strong><small>Your clues conflict even with the expanded English word pool. Reset or undo the last clue.</small>";
     return;
   }
 
@@ -206,7 +213,7 @@ function addClue(event) {
   buildFeedbackRow();
   renderHistory();
   renderCandidates();
-  setMessage(`Clue added for ${guess.toUpperCase()}. The next suggestions are filtered from the themed answer set.`);
+  setMessage(`Clue added for ${guess.toUpperCase()}. Suggestions are now filtered from the expanded English word pool, with themed words ranked first.`);
 }
 
 function undoLast() {
