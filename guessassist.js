@@ -26,6 +26,7 @@ const THEMES = [
 ];
 const LENGTHS = [5, 6, 7, 8];
 const FEEDBACK_STATES = ["miss", "present", "correct"];
+const COMMON_PRIORITY_CUTOFF = { 5: 3000, 6: 4000, 7: 5000, 8: 5000 };
 
 const themeSelect = document.querySelector("#themeSelect");
 const lengthSelect = document.querySelector("#lengthSelect");
@@ -116,17 +117,19 @@ function normalizeGuess(value) {
   return value.trim().toLowerCase().replace(/[^a-z]/g, "").slice(0, state.length);
 }
 
+function getPriorityList() {
+  return (window.COMMON_PRIORITY && window.COMMON_PRIORITY[state.length]) || [];
+}
+
 function getPriorityIndex(candidate) {
-  const priority = (window.COMMON_PRIORITY && window.COMMON_PRIORITY[state.length]) || [];
-  const index = priority.indexOf(candidate);
+  const index = getPriorityList().indexOf(candidate);
   return index === -1 ? Number.MAX_SAFE_INTEGER : index;
 }
 
 function scoreCandidate(candidate) {
   const priorityIndex = getPriorityIndex(candidate);
   const themeBonus = getThemeWords().includes(candidate) ? 1 : 0;
-  const uniquePenalty = new Set(candidate).size * -0.001;
-  return -(priorityIndex) + themeBonus + uniquePenalty;
+  return -(priorityIndex) + themeBonus;
 }
 
 function evaluateGuess(guess, solution) {
@@ -164,7 +167,22 @@ function getCandidates() {
   state.clues.forEach((clue) => {
     candidates = candidates.filter((candidate) => candidateMatches(candidate, clue));
   });
-  return candidates.sort((left, right) => scoreCandidate(right) - scoreCandidate(left));
+
+  const cutoff = COMMON_PRIORITY_CUTOFF[state.length] ?? 5000;
+
+  const commonMatches = candidates
+    .filter((candidate) => getPriorityIndex(candidate) !== Number.MAX_SAFE_INTEGER && getPriorityIndex(candidate) <= cutoff)
+    .sort((left, right) => scoreCandidate(right) - scoreCandidate(left));
+
+  const fallbackMatches = candidates
+    .filter((candidate) => getPriorityIndex(candidate) === Number.MAX_SAFE_INTEGER || getPriorityIndex(candidate) > cutoff)
+    .sort((left, right) => scoreCandidate(right) - scoreCandidate(left));
+
+  return {
+    all: candidates,
+    recommended: commonMatches.length > 0 ? commonMatches : fallbackMatches,
+    fallbackUsed: commonMatches.length === 0,
+  };
 }
 
 function renderHistory() {
@@ -178,17 +196,22 @@ function renderHistory() {
 }
 
 function renderCandidates() {
-  const candidates = getCandidates();
-  candidateCount.textContent = `${candidates.length} matches`;
+  const { all, recommended, fallbackUsed } = getCandidates();
+  candidateCount.textContent = `${all.length} matches`;
   candidateList.innerHTML = "";
 
-  if (candidates.length === 0) {
+  if (all.length === 0) {
     topPick.innerHTML = "<strong>No match</strong><small>Your clues conflict even with the expanded English word pool. Reset or undo the last clue.</small>";
     return;
   }
 
-  topPick.innerHTML = `<strong>${candidates[0].toUpperCase()}</strong><small>Best next guess among words that satisfy all clues, ranked by common usage.</small>`;
-  candidates.slice(0, MAX_SUGGESTIONS).forEach((candidate) => {
+  if (fallbackUsed) {
+    topPick.innerHTML = `<strong>${recommended[0].toUpperCase()}</strong><small>No strong common-word match was found, so these are fallback words that still satisfy all clues.</small>`;
+  } else {
+    topPick.innerHTML = `<strong>${recommended[0].toUpperCase()}</strong><small>Best next guess among the more common words that satisfy all clues.</small>`;
+  }
+
+  recommended.slice(0, MAX_SUGGESTIONS).forEach((candidate) => {
     const item = document.createElement("li");
     item.textContent = candidate.toUpperCase();
     candidateList.appendChild(item);
@@ -219,7 +242,7 @@ function addClue(event) {
   buildFeedbackRow();
   renderHistory();
   renderCandidates();
-  setMessage(`Clue added for ${guess.toUpperCase()}. Suggestions now show only words that satisfy every clue, ordered by common-word priority.`);
+  setMessage(`Clue added for ${guess.toUpperCase()}. Recommendations now prefer common words and only fall back to rarer dictionary words if needed.`);
 }
 
 function undoLast() {
