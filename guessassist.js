@@ -190,21 +190,14 @@ function resetRound() {
   buildFeedbackRow();
   renderHistory();
   renderCandidates();
-  setMessage("Add one guess and mark the feedback colors.");
+  setMessage("Add any English guess and mark the feedback colors.");
 }
 
 function addClue(event) {
   event.preventDefault();
   const guess = normalizeGuess(guessInput.value);
-  const allowedWords = getWords();
-
   if (guess.length !== state.length) {
     setMessage(`Use exactly ${state.length} letters.`);
-    return;
-  }
-
-  if (!allowedWords.includes(guess)) {
-    setMessage(`That guess is outside the selected ${state.theme} word set.`);
     return;
   }
 
@@ -213,7 +206,7 @@ function addClue(event) {
   buildFeedbackRow();
   renderHistory();
   renderCandidates();
-  setMessage(`Clue added for ${guess.toUpperCase()}. Review the next suggestions.`);
+  setMessage(`Clue added for ${guess.toUpperCase()}. The next suggestions are filtered from the themed answer set.`);
 }
 
 function undoLast() {

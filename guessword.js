@@ -159,9 +159,9 @@ function resetRound() {
   state.finished = false;
   guessInput.value = "";
   guessInput.maxLength = state.length;
-  guessInput.placeholder = `${state.length}-letter ${titleTheme(state.theme)} word`;
+  guessInput.placeholder = `${state.length}-letter word`;
   submitGuessButton.disabled = false;
-  setMessage(`New ${titleTheme(state.theme)} round. You have ${MAX_TRIES} tries.`);
+  setMessage(`New ${titleTheme(state.theme)} round. Use any English word with ${state.length} letters. You have ${MAX_TRIES} tries.`);
   renderBoard();
   updateStatus();
 }
@@ -190,15 +190,8 @@ function submitGuess(event) {
   }
 
   const guess = normalizeGuess(guessInput.value);
-  const allowedWords = getWords(state.theme, state.length);
-
   if (guess.length !== state.length) {
     setMessage(`Use exactly ${state.length} letters.`);
-    return;
-  }
-
-  if (!allowedWords.includes(guess)) {
-    setMessage(`That word is outside the current ${titleTheme(state.theme)} list.`);
     return;
   }
 
@@ -221,7 +214,7 @@ function submitGuess(event) {
     return;
   }
 
-  setMessage(`Attempt ${state.guesses.length} submitted. Keep going.`);
+  setMessage(`Attempt ${state.guesses.length} submitted. Use the feedback and keep going.`);
 }
 
 guessForm.addEventListener("submit", submitGuess);
