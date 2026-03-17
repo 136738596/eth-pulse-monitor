@@ -116,11 +116,17 @@ function normalizeGuess(value) {
   return value.trim().toLowerCase().replace(/[^a-z]/g, "").slice(0, state.length);
 }
 
-function scoreCandidate(candidate, clues) {
-  const unique = new Set(candidate).size;
-  const frequencyBonus = clues.length === 0 ? unique : 0;
-  const themeBonus = getThemeWords().includes(candidate) ? 1.5 : 0;
-  return frequencyBonus + unique / 10 + themeBonus;
+function getPriorityIndex(candidate) {
+  const priority = (window.COMMON_PRIORITY && window.COMMON_PRIORITY[state.length]) || [];
+  const index = priority.indexOf(candidate);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
+function scoreCandidate(candidate) {
+  const priorityIndex = getPriorityIndex(candidate);
+  const themeBonus = getThemeWords().includes(candidate) ? 1 : 0;
+  const uniquePenalty = new Set(candidate).size * -0.001;
+  return -(priorityIndex) + themeBonus + uniquePenalty;
 }
 
 function evaluateGuess(guess, solution) {
@@ -158,7 +164,7 @@ function getCandidates() {
   state.clues.forEach((clue) => {
     candidates = candidates.filter((candidate) => candidateMatches(candidate, clue));
   });
-  return candidates.sort((left, right) => scoreCandidate(right, state.clues) - scoreCandidate(left, state.clues));
+  return candidates.sort((left, right) => scoreCandidate(right) - scoreCandidate(left));
 }
 
 function renderHistory() {
@@ -181,7 +187,7 @@ function renderCandidates() {
     return;
   }
 
-  topPick.innerHTML = `<strong>${candidates[0].toUpperCase()}</strong><small>Best next guess from the current filtered list.</small>`;
+  topPick.innerHTML = `<strong>${candidates[0].toUpperCase()}</strong><small>Best next guess among words that satisfy all clues, ranked by common usage.</small>`;
   candidates.slice(0, MAX_SUGGESTIONS).forEach((candidate) => {
     const item = document.createElement("li");
     item.textContent = candidate.toUpperCase();
@@ -213,7 +219,7 @@ function addClue(event) {
   buildFeedbackRow();
   renderHistory();
   renderCandidates();
-  setMessage(`Clue added for ${guess.toUpperCase()}. Suggestions are now filtered from the expanded English word pool, with themed words ranked first.`);
+  setMessage(`Clue added for ${guess.toUpperCase()}. Suggestions now show only words that satisfy every clue, ordered by common-word priority.`);
 }
 
 function undoLast() {
