@@ -1,18 +1,24 @@
 const MAX_SUGGESTIONS = 8;
 const WORD_BANK = {
   ai: {
+    3: ["bot", "gpu", "llm", "rag", "api"],
+    4: ["clip", "code", "data", "eval", "node"],
     5: ["agent", "embed", "model", "token", "train"],
     6: ["neural", "prompt", "tensor", "vector", "vision"],
     7: ["chatbot", "dataset", "encoder", "weights", "minimax"],
     8: ["artifact", "gradient", "instruct", "pipeline", "training"],
   },
   internet: {
+    3: ["api", "dns", "lan", "net", "web"],
+    4: ["blog", "http", "link", "ping", "site"],
     5: ["cache", "cloud", "fiber", "login", "route"],
     6: ["domain", "packet", "server", "socket", "stream"],
     7: ["browser", "gateway", "network", "payload", "webhook"],
     8: ["frontend", "internet", "platform", "protocol", "redirect"],
   },
   web3: {
+    3: ["dao", "dex", "gas", "nft", "pow"],
+    4: ["defi", "hash", "mint", "swap", "zkvm"],
     5: ["block", "chain", "nonce", "stake", "vault"],
     6: ["bridge", "ledger", "minter", "oracle", "wallet"],
     7: ["airdrop", "gasless", "rollups", "staking", "wallets"],
@@ -24,9 +30,9 @@ const THEMES = [
   { key: "internet", label: "Internet" },
   { key: "web3", label: "Web3" },
 ];
-const LENGTHS = [5, 6, 7, 8];
+const LENGTHS = [3, 4, 5, 6, 7, 8];
 const FEEDBACK_STATES = ["miss", "present", "correct"];
-const COMMON_PRIORITY_CUTOFF = { 5: 900, 6: 1100, 7: 700, 8: 900 };
+const COMMON_PRIORITY_CUTOFF = { 3: 1200, 4: 1200, 5: 900, 6: 1100, 7: 700, 8: 900 };
 
 const themeSelect = document.querySelector("#themeSelect");
 const lengthSelect = document.querySelector("#lengthSelect");

@@ -100,6 +100,8 @@ button {
   gap: 0.55rem;
   margin: 1rem 0;
 }
+.feedback-row[data-length="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.feedback-row[data-length="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .feedback-row[data-length="5"] { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .feedback-row[data-length="6"] { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .feedback-row[data-length="7"] { grid-template-columns: repeat(7, minmax(0, 1fr)); }
